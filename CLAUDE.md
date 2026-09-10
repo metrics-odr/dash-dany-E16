@@ -30,7 +30,7 @@ Ordem para colocar um cliente novo no ar. Cada item aponta o arquivo e o marcado
 4. [ ] **`config.js`** (raiz do repo) — copie `config.example.js` para
    `config.js` e preencha `GITHUB_USERNAME`, `GITHUB_REPOSITORY`,
    `PROJECT_NAME`. Depois substitua manualmente os placeholders
-   `<GITHUB_USERNAME>`/`<GITHUB_REPOSITORY>` que aparecem em `SETUP-CRON.md` e
+   `metrics-odr`/`dash-dany-E16` que aparecem em `SETUP-CRON.md` e
    `README.md` pelos mesmos valores (são docs Markdown estáticos, a
    substituição não é automática).
 5. [ ] **`SETUP-CRON.md`** — depois do passo acima, gere um **token
@@ -66,37 +66,40 @@ via CDN) publicado no **GitHub Pages**, que cruza o gerenciador **Meta Ads** com
 de **Compradores** e se atualiza a cada ~30 min (build na nuvem via GitHub Actions,
 disparado pelo cron-job.org). **Somente leitura** das planilhas.
 
-- **URL pública:** `https://<GITHUB_USERNAME>.github.io/<GITHUB_REPOSITORY>/`
+- **URL pública:** `https://metrics-odr.github.io/dash-dany-E16/`
   (preencha `config.js` — ver checklist acima)
-- **Cliente/projeto:** preencher em `build/config.py` (`CLIENT_NAME`/`CLIENT_SUB`)
-- **Tipo de funil:** VSL / tráfego direto (não há etapa de Leads/MQL) —
+- **Cliente/projeto:** Dany Sakugawa — Lançamento Pago (`build/config.py`: `CLIENT_NAME`/`CLIENT_SUB`)
+- **Tipo de funil:** Masterclass E16 — lançamento pago, sem VSL (o lead é a venda do
+  ingresso) — `Anúncio → Página → Checkout → Compra`:
   `Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`
+- **Sigla do funil:** `E16` (prefixo `26-E16` em todo `Campaign Name` do Meta Ads)
 
 ## Fontes de dados (Google Sheets)
 
-> Preencha esta seção com os dados da planilha real do cliente depois de
-> configurar `build/config.py` (item 2 do checklist).
+Planilha: "Dany | E16 | Planilha Central de Lançamento Pago"
+(`SPREADSHEET_ID` em `build/config.py`) — Meta Ads e Compradores ficam na mesma
+planilha (leitura via export CSV).
 
-Spreadsheet ID: preenchido em `SPREADSHEET_ID` (`build/config.py`) — as duas abas
-abaixo ficam, por padrão, na mesma planilha (leitura via export CSV).
-
-| Aba | gid | Colunas usadas (exemplo — ajuste à planilha real) |
+| Aba | gid | Colunas |
 |-----|-----|----------------|
-| **Meta Ads** | `GID_META` | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · Landing Page Views · Checkouts Initiated |
-| **Compradores** | `GID_SALES` | Produto · Nome · Email · Data · Valor · **Faturamento** (se houver) · utm_source · utm_medium · utm_content · utm_term · utm_campaign · Status · … |
+| **Meta Ads** | `GID_META` (`1059708846`) | Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · Landing Page Views · Checkouts Initiated · Campaign Status · Ad Status · Ad Set Status · Ad ID · Creative Instagram Permalink |
+| **Compradores** ("Ingressos") | `GID_SALES` (`1836439885`) | Data do pedido · Aprovado em · Pagamento · Produto · Valor · Situacao · Nome · Email · Telefone · Pagina · UTM Source · UTM Medium · UTM Campaign · UTM Term · UTM Content · Marcadores · Campanha (src) · Criativo (src) · Oferta · Pedido · Hotmart ID · src bruto · sck bruto · xcod |
 
-**Pontos de atenção ao configurar um cliente novo** (verifique contra a planilha real):
-- **Coluna de receita**: por padrão o alias de `val` prioriza `faturamento` sobre
-  `valor` (`header_index` em `build/build.py`) — confirme qual coluna representa o
-  valor líquido/bruto correto para este cliente e ajuste o alias se necessário.
-- **Coluna de status de pagamento**: se a planilha tiver uma coluna confiável de
-  status pago/aprovado, deixe `COUNT_ALL_AS_PAID = False` em `build/config.py`
-  (o build filtra por `is_paid()`). Se for uma lista de compradores onde toda
-  linha já é uma compra concretizada, deixe `True`.
-- **Identificador do anúncio**: confirme em qual coluna UTM o cliente manda o
-  nome do anúncio (`Ad Name` real do Meta) — muitas vezes é `UTM Content`, não
-  `UTM Term` (que costuma carregar o *posicionamento*: Reels/Feed/Stories). O
-  match Meta↔venda deve usar essa coluna.
+**Regras confirmadas para este cliente:**
+- **Coluna de receita**: `Valor` (não há coluna "Faturamento" separada — ticket único
+  do ingresso, ~R$29). O alias `faturamento > valor` de `build/build.py` cai no
+  `Valor` normalmente.
+- **Coluna de status de pagamento**: `Situacao` (valores vistos: `Aprovada`/
+  `Cancelado`) é confiável → `COUNT_ALL_AS_PAID = False` em `build/config.py`. Como
+  o cabeçalho é `Situacao` (não `Status`), o alias genérico de status em
+  `build/build.py` foi ampliado para incluir `"situacao"` (mudança genérica, não
+  específica deste cliente).
+- **Identificador do anúncio**: `UTM Content` (ex.: `BTS | VD_222`) — confirmado
+  batendo com `Ad Name` real do Meta. `UTM Term` carrega o **posicionamento**
+  (`Instagram_Stories`/`Instagram_Feed`), não o anúncio — não usar para o match.
+- **Produto principal**: string única na coluna `Produto` — `MasterClass
+  Best-Seller de Verdade` (`MAIN_PRODUCT_PREFIX`). Não há upsell/downsell pós-compra
+  neste funil (`UPSELL_PRODUCT_PREFIX` vazio).
 
 URL de export CSV: `https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid={GID}`
 

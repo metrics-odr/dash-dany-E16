@@ -340,7 +340,7 @@ def process(meta_rows, sales_rows):
          # Fallback p/ planilhas sem colunas UTM próprias: 1 campo concatenado
          # (ver split_utm_detail acima).
          "utm_detail": ["detalhe utm", "utm detail", "detalhe do utm"],
-         "status": ["status"]},
+         "status": ["status", "situacao"]},
         # Fallback posicional só p/ colunas que existem nesta planilha
         # (Produto·Nome·Email·Data·Valor·Taxas·Faturamento). Sem fallback p/
         # utm_*/status: a planilha não tem essas colunas, então ausência -> vazio

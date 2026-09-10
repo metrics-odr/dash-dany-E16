@@ -1,8 +1,9 @@
-# Dashboard de Controle de Tráfego Pago (VSL/Tráfego Direto) — TEMPLATE
+# Dashboard de Controle de Tráfego Pago — Dany Sakugawa (Masterclass E16)
 
-> Este repositório é um **template reutilizável**. Ele ainda não está configurado
-> para nenhum cliente — siga o guia abaixo (ou o **CHECKLIST DE NOVO CLIENTE** no
-> topo do `CLAUDE.md`) para colocar um dashboard no ar em ~15-20 minutos.
+> Dashboard configurado para o funil de lançamento pago **Masterclass E16** —
+> produto principal **MasterClass Best-Seller de Verdade** (venda de ingresso via
+> Hotmart). Engine genérica reaproveitada do template — ver `CLAUDE.md` para o
+> checklist original e detalhes de configuração.
 
 ## Visão geral
 
@@ -12,7 +13,8 @@ Pages**, que cruza o gerenciador **Meta Ads** com uma lista de **Compradores**
 (build na nuvem via GitHub Actions, disparado pelo cron-job.org). **Somente
 leitura** das planilhas — o dashboard nunca escreve nelas.
 
-Funil coberto: **VSL / tráfego direto** (sem etapa de Leads/MQL) —
+Funil coberto: **tráfego direto, sem VSL** (sem etapa de Leads/MQL) — o lead é a
+própria venda do ingresso — `Anúncio → Página → Checkout → Compra`:
 `Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`.
 
 Como funciona, por dentro:
@@ -95,10 +97,10 @@ normalmente você não precisa mexer em nada manualmente. Para conferir/forçar:
    **Actions** → workflow **"Build & Deploy Dashboard"** → **Run workflow**
    (branch `main`).
 4. Depois do primeiro deploy bem-sucedido, a URL pública aparece em **Settings
-   → Pages** e é sempre `https://<GITHUB_USERNAME>.github.io/<GITHUB_REPOSITORY>/`.
+   → Pages** e é sempre `https://metrics-odr.github.io/dash-dany-E16/`.
 5. Configure o cron-job.org para dar continuidade aos builds automáticos a cada
    30 min — passo a passo completo em **`SETUP-CRON.md`** (ele já vem com
-   placeholders `<GITHUB_USERNAME>`/`<GITHUB_REPOSITORY>` para você substituir
+   placeholders `metrics-odr`/`dash-dany-E16` para você substituir
    pelos valores do seu `config.js`).
 
 ## Como configurar a planilha/API (Google Sheets)
@@ -171,7 +173,7 @@ Passo a passo:
 1. `cp config.example.js config.js`.
 2. Preencha `GITHUB_USERNAME`, `GITHUB_REPOSITORY` e `PROJECT_NAME`.
 3. Use esses **mesmos valores** para substituir manualmente os placeholders
-   `<GITHUB_USERNAME>` e `<GITHUB_REPOSITORY>` que aparecem em `SETUP-CRON.md`,
+   `metrics-odr` e `dash-dany-E16` que aparecem em `SETUP-CRON.md`,
    `README.md` (este arquivo) e `CLAUDE.md` — são documentos Markdown estáticos,
    então a substituição não é automática (busque pelo texto exato no
    repositório e troque em cada ocorrência).

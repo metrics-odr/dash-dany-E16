@@ -22,9 +22,9 @@ from __future__ import annotations
 # GID_META / GID_SALES: o número depois de "gid=" na URL de cada aba.
 # A planilha precisa estar com o link público em modo "Qualquer pessoa com
 # o link pode visualizar" (o build lê via export CSV, somente leitura).
-SPREADSHEET_ID = ""   # ex.: "1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcdefg"
-GID_META = ""          # ex.: "111111111"  (aba Meta Ads)
-GID_SALES = ""         # ex.: "222222222"  (aba Compradores)
+SPREADSHEET_ID = "1aWmD77nZ77CO3Tcb0JS9fGwcTYY553IAzqK4Yb4wJlE"
+GID_META = "1059708846"          # aba Meta Ads
+GID_SALES = "1836439885"         # aba Ingressos (Compradores)
 
 # ==========================================================================
 # 2) REGRAS DE NEGÓCIO
@@ -37,14 +37,14 @@ TAX_FACTOR = 1.13806   # padrão do template (equivale a +13,806%); use 1.0 se o
 # Produto principal do funil (base de Vendas/CAC/ConvCHK/Ticket). Casamento
 # por PREFIXO, sem acento e em minúsculas, sobre o nome do produto que
 # aparece na coluna "Produto" da planilha de Compradores.
-MAIN_PRODUCT_PREFIX = ""   # ex.: "nome do produto" (produto "Nome do Produto")
+MAIN_PRODUCT_PREFIX = "masterclass best-seller de verdade"   # produto "MasterClass Best-Seller de Verdade"
 
 # A planilha de Compradores tem uma coluna de status de pagamento confiável
 # (ex.: "pago"/"aprovado" vs. "aberto"/"cancelado")? Se SIM, deixe False e o
 # build filtra por is_paid(). Se a planilha é uma lista de COMPRADORES onde
 # toda linha já é uma compra concretizada (sem coluna de status utilizável),
 # deixe True para contar todas as linhas como venda paga.
-COUNT_ALL_AS_PAID = True
+COUNT_ALL_AS_PAID = False   # planilha tem coluna "Situacao" confiável (Aprovada/Cancelado)
 
 # Upsell/downsell pós-compra (OPCIONAL) — deixe UPSELL_PRODUCT_PREFIX vazio se
 # o funil não tiver esse tipo de oferta. Alguns funis oferecem, logo após a
@@ -68,10 +68,10 @@ UPSELL_DSL_LABEL = ""        # ex.: "Nome do Upsell (DSL)" — rótulo de exibi�
 # ==========================================================================
 # 3) RÓTULOS EXIBIDOS NA INTERFACE
 # ==========================================================================
-CLIENT_NAME = ""    # ex.: "Nome do Cliente" — aparece no topo do menu lateral
-CLIENT_SUB = ""     # ex.: "VSL Nome do Funil" — subtítulo abaixo do nome
+CLIENT_NAME = "Dany Sakugawa"
+CLIENT_SUB = "Lançamento Pago"
 TAX_LABEL = "Imposto Meta ×1,13806"       # rótulo do toggle de imposto (ajuste se TAX_FACTOR mudar)
-MAIN_PRODUCT = ""    # ex.: "Nome do Produto" — nome de exibição do produto principal
+MAIN_PRODUCT = "MasterClass Best-Seller de Verdade"
 
 # ==========================================================================
 # 4) METAS (aba Relatórios) — código de cor de CAC/ROAS
@@ -81,8 +81,8 @@ MAIN_PRODUCT = ""    # ex.: "Nome do Produto" — nome de exibição do produto 
 # Faixas de cor (sobre o desempenho): <REPORT_BAND_LOW vermelho ·
 #   REPORT_BAND_LOW–0.99 amarelo · 1.00–REPORT_BAND_HIGH verde ·
 #   ≥REPORT_BAND_HIGH azul-ciano.
-CAC_TARGET = 0.0     # CAC alvo (R$ por venda do produto principal)
-ROAS_TARGET = 0.0    # ROAS alvo (Faturamento / Gasto)
+CAC_TARGET = 15.0    # CAC alvo (R$ por venda do produto principal) — aba TAP: "Meta de CAC dos Ingressos"
+ROAS_TARGET = 0.5    # ROAS alvo (Faturamento / Gasto) — aba TAP: "ROAS do Ingresso Desejado" (funil só do ingresso; lucro vem do evento)
 REPORT_BAND_LOW = 0.70
 REPORT_BAND_HIGH = 1.30
 
