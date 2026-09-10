@@ -1,25 +1,30 @@
 # GUIA — Geração diária dos Briefings do Gestor (aba Relatórios)
 
-> Lido pela **Routine diária (23h59 BRT)** do Claude Code que regenera
-> `build/relatorios.json`. **Não usa a API paga da Anthropic** — roda na
-> assinatura do Claude Code (sem consumir créditos). Toda a matemática vem de
-> `build/gerar_relatorios.py`, rodado pelo **GitHub Actions** (não pela
-> Routine — o sandbox do agente não alcança o Google Sheets); o Claude só
-> **redige os textos**.
+> Lido pela **Routine diária (07:00 BRT — horário escolhido pelo cliente)**
+> do Claude Code que regenera `build/relatorios.json`. **Não usa a API paga
+> da Anthropic** — roda na assinatura do Claude Code (sem consumir créditos).
+> Toda a matemática vem de `build/gerar_relatorios.py`, rodado pelo **GitHub
+> Actions** (não pela Routine — o sandbox do agente não alcança o Google
+> Sheets); o Claude só **redige os textos**.
 >
-> **Por que 23h59 e não de manhã:** rodando no fim do dia, o período "hoje"
-> é analisado com o dia **quase inteiro** de dados (não só as primeiras horas).
-> Por isso a Routine também migra o texto: o que estava em "hoje" (analisado
-> ontem à noite, já com o dia completo) vira o novo "ontem"; e escreve um
-> "hoje" novo do zero para o dia que acabou de fechar. Ver passo 4.
+> **Por que este cliente roda de manhã (07h) e não à noite (padrão do
+> template é 23h59):** o padrão do template roda no fim do dia para que
+> "hoje" seja analisado com o dia quase inteiro de dados — ver nota abaixo.
+> Este cliente pediu explicitamente 07:00 BRT; o trade-off aceito é que
+> "hoje" só reflete dados de madrugada (pouco ou nenhum gasto/venda na
+> maior parte das execuções) até fechar de fato à noite — **não trate um
+> "hoje" raso pela manhã como sinal de queda de performance**, é esperado
+> pelo horário de corte. A migração hoje→ontem (passo 4) ainda se aplica:
+> o texto que estava em "hoje" na execução anterior vira "ontem".
 >
 > **Antes de redigir, leia `build/METODO-ODR-ANALISE.md`.** Ele traz o
 > método de raciocínio (Método ODR): como identificar o funil, mapear
 > dependências entre métricas, achar causa raiz, distinguir sintoma/
 > hipótese/evidência e priorizar ações — é genérico e vale para qualquer
 > funil. Este guia (`GUIA-RELATORIOS.md`) traz o passo a passo operacional
-> da Routine e as particularidades **deste** funil (VSL/tráfego direto):
-> métricas específicas, tags de ação e formato do JSON.
+> da Routine e as particularidades **deste** funil (lançamento pago, sem
+> VSL — venda do ingresso): métricas específicas, tags de ação e formato
+> do JSON.
 
 ## O que a Routine faz (passo a passo)
 
@@ -27,11 +32,11 @@
 > `docs.google.com`, só o runner do GitHub Actions alcança — ver CLAUDE.md,
 > "problemas conhecidos" #4):
 > 1. O workflow `.github/workflows/gerar-relatorios-metrics.yml` roda no
->    GitHub Actions **~9 min antes** (23:50 BRT), busca os CSVs públicos das
+>    GitHub Actions **~10 min antes** (06:50 BRT), busca os CSVs públicos das
 >    planilhas (`python build/gerar_relatorios.py`, sem argumentos = busca ao
 >    vivo) e commita `build/relatorios_metrics.json` na `main`. **Só números,
 >    sem IA.**
-> 2. A Routine do Claude Code (23:59 BRT) só precisa dar **pull** na `main`
+> 2. A Routine do Claude Code (07:00 BRT) só precisa dar **pull** na `main`
 >    para já ter esse arquivo pronto — não baixa planilha nem roda script.
 
 1. **Checkout / pull** da branch de produção (`main`) já atualizada.

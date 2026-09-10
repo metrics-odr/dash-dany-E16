@@ -40,12 +40,17 @@ Ordem para colocar um cliente novo no ar. Cada item aponta o arquivo e o marcado
 6. [ ] **GitHub Pages** — confirmar que o workflow `.github/workflows/deploy.yml`
    está na branch `main` e que o Pages foi habilitado (ele se autoconfigura na
    1ª execução via `actions/configure-pages`).
-7. [ ] **Routine do Briefing do Gestor** — configure uma Routine do Claude Code (ou
-   equivalente) que rode **23:59 BRT**, leia `build/relatorios_metrics.json` e
-   escreva `build/relatorios.json` seguindo `build/GUIA-RELATORIOS.md` (ver "Aba
-   Relatórios" abaixo). É o que preenche o Briefing do Gestor; o resto da aba
-   (cards, Saúde do funil, Top/Piores anúncios) roda 100% no navegador, sem essa
-   Routine.
+7. [x] **Routine do Briefing do Gestor** — configure uma Routine do Claude Code (ou
+   equivalente) que rode **23:59 BRT** (padrão do template — ver nota abaixo), leia
+   `build/relatorios_metrics.json` e escreva `build/relatorios.json` seguindo
+   `build/GUIA-RELATORIOS.md` (ver "Aba Relatórios" abaixo). É o que preenche o
+   Briefing do Gestor; o resto da aba (cards, Saúde do funil, Top/Piores anúncios)
+   roda 100% no navegador, sem essa Routine.
+   **Configurado para este cliente às 07:00 BRT (pedido explícito, não o padrão do
+   template)** — o workflow `gerar-relatorios-metrics.yml` foi ajustado para rodar
+   06:50 BRT. Trade-off aceito: o período "hoje" no briefing reflete só a madrugada
+   até o horário de corte, não o dia quase completo (ver nota em
+   `build/GUIA-RELATORIOS.md`).
 8. [ ] *(OPCIONAL/legado — não é preciso para o cliente ir ao ar)* **Worker da IA
    Insights** — o dashboard não tem mais uma aba de geração de insights ao vivo
    (foi substituída pela Routine acima + o card "Saúde do funil", que não usa IA);
@@ -192,7 +197,7 @@ build/estilos.css          # layout/componentes (CSS não-cor)
 build/app.js               # lógica + renderização (gráficos/heatmap leem as cores via CSS vars)
 .github/workflows/deploy.yml         # roda build.py e publica no Pages
 .github/workflows/deploy-worker.yml  # publica o Worker de IA (legado/opcional — ver "IA Insights (legado)")
-.github/workflows/gerar-relatorios-metrics.yml # 23:50 BRT: busca as planilhas e commita relatorios_metrics.json
+.github/workflows/gerar-relatorios-metrics.yml # 06:50 BRT (este cliente): busca as planilhas e commita relatorios_metrics.json
 ia-worker/worker.js    # backend de IA legado/opcional (ENGINE — não editar por cliente; não usado pela UI atual)
 ia-worker/wrangler.toml # nome do Worker (preencher por cliente, placeholder nomecliente-ia-insights)
 build/relatorios.json  # briefings do Gestor por período (aba Relatórios) — VERSIONADO
@@ -232,14 +237,16 @@ O **Briefing do Gestor** (texto interpretativo por período) é **pré-gerado po
 e lido de `build/relatorios.json` — **sem chamada de API no navegador nem créditos
 da Anthropic**. Regeneração em **2 etapas diárias** (o sandbox do agente não alcança
 o Google Sheets, só o runner do GitHub Actions — ver "problemas conhecidos" #4):
-**23:50 BRT** o workflow `gerar-relatorios-metrics.yml` busca as planilhas e commita
-`build/relatorios_metrics.json` (só números); **23:59 BRT** uma **Routine do
-Claude Code** lê esse arquivo, migra o texto que estava em "hoje" para "ontem" e
-redige os 9 briefings do zero seguindo `build/GUIA-RELATORIOS.md`, commitando
-`relatorios.json`. Rodar no fim do dia (não de manhã) garante que "hoje" seja
-analisado com o dia quase completo. Se o JSON não existir, a aba mostra tudo
-menos o briefing (cards/tabelas seguem funcionando). Configure essa Routine (ou
-equivalente) por cliente — não vem pronta neste template.
+**Padrão do template: 23:50 BRT** o workflow `gerar-relatorios-metrics.yml` busca
+as planilhas e commita `build/relatorios_metrics.json` (só números); **23:59 BRT**
+uma **Routine do Claude Code** lê esse arquivo, migra o texto que estava em "hoje"
+para "ontem" e redige os 9 briefings do zero seguindo `build/GUIA-RELATORIOS.md`,
+commitando `relatorios.json`. Rodar no fim do dia (não de manhã) garante que "hoje"
+seja analisado com o dia quase completo.
+**Este cliente pediu 07:00 BRT** (workflow ajustado para 06:50 BRT) — trade-off
+aceito de "hoje" refletir só a madrugada até o corte; ver nota em
+`build/GUIA-RELATORIOS.md`. Se o JSON não existir, a aba mostra tudo menos o
+briefing (cards/tabelas seguem funcionando).
 
 O `build.py` **não agrega**: exporta as linhas cruas e toda a lógica (filtros, KPIs,
 tabelas, gráficos, heatmap, imposto, tema) roda no navegador.
