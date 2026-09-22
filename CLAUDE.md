@@ -127,6 +127,19 @@ ConvCHK (Vendas/Checkouts) · Faturamento · ROAS (Faturamento/Gasto) · Ticket 
   casa, a venda herda a campanha/conjunto **reais do Meta** (fica na mesma linha do
   gasto nas tabelas). Vendas de outros funis (UTM/produto não relacionados) ficam de
   fora. Só conta status pago.
+- **Desambiguação de conjunto quando o mesmo anúncio roda em mais de 1 conjunto**:
+  campanha+anúncio às vezes não é suficiente — o mesmo `Ad Name` pode rodar
+  simultaneamente em conjuntos diferentes na mesma campanha (ex.: teste de público
+  reaproveitando o mesmo criativo — confirmado neste cliente na campanha "Teste
+  Publicos": `BTS | VD_240` roda em 4 conjuntos ao mesmo tempo). Nesse caso o
+  `build.py` tenta desambiguar pelo `UTM Medium`/`UTM Term` da própria venda: a
+  planilha deste cliente é inconsistente sobre qual dos dois carrega o nome real
+  do conjunto (varia por página/template de tracking — em `master-v1b2` é o `UTM
+  Term`; em outras é o `UTM Medium`), então o build confere os dois contra os
+  conjuntos candidatos. Sem match exato em nenhum dos dois, a venda fica marcada
+  como `(múltiplos conjuntos)` em vez de ser creditada a um conjunto arbitrário
+  (campanha/anúncio/Vendas totais continuam corretos; só o conjunto fica
+  indefinido nesse caso raro).
 - Se não houver coluna de Receita, não há Receita/ROAS/Ticket — ajuste o texto desta
   seção se o cliente novo tiver uma regra diferente.
 - **Upsell/downsell pós-compra (OPCIONAL)**: se o funil do cliente tiver, logo após
