@@ -275,11 +275,17 @@ def process(meta_rows, sales_rows):
     # da tabela — nunca misturando linhas de campanhas diferentes — e ignorando
     # o filtro de DATA da topbar (o status usa sempre a linha mais recente
     # disponível, não só as do período selecionado).
-    # (campanha, anúncio) normalizados -> (campanha, conjunto) reais do Meta.
-    # A chave inclui a CAMPANHA porque o mesmo nome de anúncio (ex. "AD01") se
-    # repete em campanhas diferentes; casar só pelo nome do anúncio atribuiria a
-    # venda à campanha errada (era o caso da campanha "Bidcap"). Guardar os nomes
-    # do Meta também alinha a venda à mesma linha do gasto nas tabelas.
+    # (campanha, anúncio) normalizados -> lista de (campanha, conjunto) reais do
+    # Meta em que esse anúncio roda. A chave inclui a CAMPANHA porque o mesmo
+    # nome de anúncio (ex. "AD01") se repete em campanhas diferentes; casar só
+    # pelo nome do anúncio atribuiria a venda à campanha errada (era o caso da
+    # campanha "Bidcap"). Guardar os nomes do Meta também alinha a venda à mesma
+    # linha do gasto nas tabelas.
+    # É uma LISTA (não 1 valor só) porque o mesmo anúncio pode rodar em MAIS DE
+    # UM conjunto ao mesmo tempo dentro da mesma campanha (ex.: teste de
+    # público/posicionamento reaproveitando o mesmo criativo em conjuntos
+    # diferentes) — nesse caso o match fica ambíguo por campanha+anúncio sozinho;
+    # ver desambiguação por UTM Medium/Term mais abaixo, na leitura da venda.
     ad_map = {}
     # Anúncio (nome, ex. "AD07") -> 1 permalink do Instagram. "Qualquer um
     # correlato" ao anúncio serve (o mesmo criativo pode rodar em várias
@@ -294,8 +300,9 @@ def process(meta_rows, sales_rows):
         adset = cell(row, midx["adset"]) or "(sem conjunto)"
         ad = cell(row, midx["ad"]) or "(sem anúncio)"
         key = (norm(camp), norm(ad))
-        if key not in ad_map:
-            ad_map[key] = (camp, adset)
+        variants = ad_map.setdefault(key, [])
+        if not any(norm(v[1]) == norm(adset) for v in variants):
+            variants.append((camp, adset))
         link = cell(row, midx["link"])
         if link and ad not in ad_links:
             ad_links[ad] = link
@@ -337,6 +344,10 @@ def process(meta_rows, sales_rows):
          "utm_content": ["utm content", "utm_content"],
          "utm_campaign": ["utm campaign", "utm_campaign"],
          "utm_medium": ["utm medium", "utm_medium"],
+         # Usado só pra desambiguar conjunto quando o mesmo anúncio roda em mais
+         # de 1 conjunto na campanha (ver comentário no match abaixo) — não é o
+         # identificador do anúncio (isso é UTM Content).
+         "utm_term": ["utm term", "utm_term"],
          # Fallback p/ planilhas sem colunas UTM próprias: 1 campo concatenado
          # (ver split_utm_detail acima).
          "utm_detail": ["detalhe utm", "utm detail", "detalhe do utm"],
@@ -366,13 +377,15 @@ def process(meta_rows, sales_rows):
             continue
         prod = cell(row, sidx["prod"])
         if use_utm_detail:
-            det_medium, det_campaign, _det_term, det_content = split_utm_detail(cell(row, sidx["utm_detail"]))
+            det_medium, det_campaign, det_term, det_content = split_utm_detail(cell(row, sidx["utm_detail"]))
         # O identificador do anúncio no Meta (Ad Name = "AD01", "AD02"...) vem do
-        # UTM Content. O UTM Term carrega o POSICIONAMENTO (Instagram_Reels/Feed/
-        # Stories), não o anúncio — por isso o match é pelo UTM Content.
+        # UTM Content. O UTM Term normalmente carrega o POSICIONAMENTO
+        # (Instagram_Reels/Feed/Stories), não o anúncio — por isso o match é pelo
+        # UTM Content, não pelo Term.
         ad = (det_content if use_utm_detail else cell(row, sidx["utm_content"])) or "(sem anúncio)"
         sale_camp = (det_campaign if use_utm_detail else cell(row, sidx["utm_campaign"])) or "(sem campanha)"
         adset_own = (det_medium if use_utm_detail else cell(row, sidx["utm_medium"])) or "(sem conjunto)"
+        sale_term = det_term if use_utm_detail else cell(row, sidx["utm_term"])
         main = is_main_product(prod)
         upsell = (not main) and is_upsell_product(prod)
         if not (main or upsell):
@@ -380,7 +393,23 @@ def process(meta_rows, sales_rows):
         # Match com o Meta = campanha + anúncio juntos (o mesmo Ad Name se repete
         # entre campanhas; casar só pelo anúncio atribui a venda à campanha errada).
         meta_key = (norm(sale_camp), norm(ad))
-        meta_hit = ad_map.get(meta_key)
+        candidates = ad_map.get(meta_key) or []
+        if len(candidates) == 1:
+            meta_hit = candidates[0]
+        elif len(candidates) > 1:
+            # O mesmo anúncio roda em MAIS DE UM conjunto nesta campanha (ex.:
+            # teste de público reaproveitando o mesmo criativo) — campanha+anúncio
+            # sozinho não diz qual conjunto gerou esta venda específica. Tenta
+            # desambiguar pelo UTM Medium/Term da própria venda: dependendo da
+            # página/template de tracking, o nome real do conjunto vem num
+            # desses dois campos (nenhum dos dois é fixo — por isso confere os
+            # dois). Sem um match exato, marca como ambíguo em vez de creditar
+            # um conjunto arbitrário (a campanha/anúncio continuam corretos).
+            own = {norm(adset_own), norm(sale_term)}
+            match = next((c for c in candidates if norm(c[1]) in own), None)
+            meta_hit = match or (candidates[0][0], "(múltiplos conjuntos)")
+        else:
+            meta_hit = None
         raw_rows.append({
             "d": parse_date(cell(row, sidx["created"])),
             "prod": prod, "main": main, "upsell": upsell,
