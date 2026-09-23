@@ -101,13 +101,23 @@ planilha (leitura via export CSV).
   específica deste cliente).
 - **Identificador do anúncio**: `UTM Content` — na maioria das linhas vem o `Ad
   Name` real do Meta (ex.: `BTS | VD_222`), mas em algumas origens de tráfego
-  (confirmado com `UTM Source = roleta`) vem o **Ad ID numérico** do anúncio em
-  vez do nome (ex.: `120212345678901`). O `build.py` tenta o match por `Ad
-  Name` primeiro e, se não achar, tenta por `Ad ID` (coluna `Ad ID` da aba Meta
-  Ads — 2º caminho, `ad_id_map`); quando casa pelo Ad ID, a venda herda o `Ad
-  Name` real do Meta para exibição (não mostra o ID cru nas tabelas). `UTM
-  Term` carrega o **posicionamento** (`Instagram_Stories`/`Instagram_Feed`),
-  não o anúncio — não usar para o match.
+  (confirmado com `UTM Source = roleta`) o valor de `UTM Content` **não bate
+  nem com o Ad Name nem com o Ad ID** do Meta (causa raiz ainda não confirmada
+  — pode ser um clique ID ou outro identificador da origem "roleta"). Pra essas
+  linhas, o Ad Name real está embutido na coluna **`sck bruto`**: um campo de
+  tracking cru no formato `pagina|fonte|conjunto|campanha|ANUNCIO|ad_id|subid`
+  (mesma regra de split do `split_utm_detail`/"Detalhe UTM" — "|" colado separa
+  campo, "|" solto com espaço nos dois lados é parte do nome); o anúncio é
+  sempre o 5º segmento (índice 4), ex. `BTS | VD_231`. O `build.py`
+  (`ad_name_from_sck_bruto`) tenta o match nesta ordem: 1) `UTM Content` = `Ad
+  Name` (texto) · 2) `UTM Content` = `Ad ID` (numérico, coluna `Ad ID` da aba
+  Meta Ads — mantido como caminho intermediário, mesmo com a causa raiz do
+  `UTM Content` de "roleta" incerta, caso bata em algum outro caso) · 3) Ad
+  Name extraído de `sck bruto` (último recurso, cobre o caso "roleta"). Quando
+  casa pelo caminho 2 ou 3, a venda herda o `Ad Name` real do Meta para exibição
+  (não mostra o ID/valor cru nas tabelas). `UTM Term` carrega o
+  **posicionamento** (`Instagram_Stories`/`Instagram_Feed`), não o anúncio —
+  não usar para o match.
 - **Produto principal**: string única na coluna `Produto` — `MasterClass
   Best-Seller de Verdade` (`MAIN_PRODUCT_PREFIX`). Não há upsell/downsell pós-compra
   neste funil (`UPSELL_PRODUCT_PREFIX` vazio).
@@ -304,10 +314,13 @@ Teste local:
    Casar pela coluna errada zera as atribuições. Além disso, nomes de anúncio podem se
    repetir entre campanhas diferentes — o match precisa ser **campanha+anúncio juntos**
    (`UTM Campaign`+`UTM Content`), senão a venda pode ser atribuída à campanha errada.
-   Se o `UTM Content` bater com o `Ad ID` (numérico) em vez do `Ad Name` — acontece em
+   Se o `UTM Content` não bater nem com `Ad Name` nem com `Ad ID` — acontece em
    algumas origens de tráfego (ex.: `UTM Source = roleta` neste cliente) — o `build.py`
-   já tenta o match por `Ad ID` como 2º caminho (via a coluna `Ad ID` da aba Meta Ads,
-   `ad_id_map`) antes de desistir; confirme que a aba Meta Ads do cliente tem essa
-   coluna preenchida se vendas de uma origem específica continuarem de fora.
+   tenta como último recurso extrair o Ad Name da coluna **`sck bruto`** (formato
+   `pagina|fonte|conjunto|campanha|ANUNCIO|ad_id|subid` — ver "Identificador do
+   anúncio" acima); confirme que a planilha do cliente tem essa coluna preenchida
+   se vendas de uma origem específica continuarem de fora, e confira se o 5º
+   segmento (`|`-separado, "colado") realmente é o Ad Name — a posição pode variar
+   por cliente/template de tracking.
    Confira o valor real do `Ad Name` na API/painel do Meta e compare com as colunas
    UTM antes de mexer no alias.
