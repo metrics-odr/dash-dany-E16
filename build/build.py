@@ -222,6 +222,21 @@ def split_utm_detail(raw: str) -> tuple[str, str, str, str]:
     return parts[0], parts[1], parts[2], parts[3]
 
 
+def ad_name_from_sck_bruto(raw: str) -> str:
+    """A coluna "sck bruto" da planilha de Compradores é um campo cru de
+    tracking com o mesmo padrão de separador do split_utm_detail acima
+    ("|" solto = dentro do nome; "|" colado = separador de campo), mas com
+    mais segmentos: pagina|fonte|conjunto|campanha|ANUNCIO|ad_id|subid...
+    O anúncio (Ad Name real, ex. "BTS | VD_231") é sempre o 5º segmento
+    (índice 4) — confirmado batendo com o Ad Name do Meta mesmo em linhas
+    onde o UTM Content da venda não é confiável (ex. UTM Source = roleta,
+    onde o UTM Content vem com outro valor que não bate com Ad Name/Ad ID).
+    Usado só como ÚLTIMO caminho de match, quando UTM Content não achou
+    nada — não sobrescreve o comportamento já validado via UTM Content."""
+    parts = [p.strip() for p in _UTM_DETAIL_SPLIT.split(raw or "")]
+    return parts[4] if len(parts) > 4 else ""
+
+
 # --------------------------------------------------------------------------- #
 # Processamento -> registros brutos
 # --------------------------------------------------------------------------- #
@@ -371,6 +386,10 @@ def process(meta_rows, sales_rows):
          # Fallback p/ planilhas sem colunas UTM próprias: 1 campo concatenado
          # (ver split_utm_detail acima).
          "utm_detail": ["detalhe utm", "utm detail", "detalhe do utm"],
+         # Campo de tracking cru (ver ad_name_from_sck_bruto) — usado só como
+         # último caminho de match do anúncio quando UTM Content não bate com
+         # Ad Name nem Ad ID do Meta.
+         "sck_bruto": ["sck bruto", "sck_bruto"],
          "status": ["status", "situacao"]},
         # Fallback posicional só p/ colunas que existem nesta planilha
         # (Produto·Nome·Email·Data·Valor·Taxas·Faturamento). Sem fallback p/
@@ -412,12 +431,19 @@ def process(meta_rows, sales_rows):
             continue
         # Match com o Meta = campanha + anúncio juntos (o mesmo Ad Name/Ad ID se
         # repete entre campanhas; casar só pelo anúncio atribui a venda à
-        # campanha errada). 1º caminho: UTM Content = Ad Name (texto). Algumas
-        # origens de tráfego gravam o UTM Content como o Ad ID (numérico)
-        # em vez do nome — se o 1º caminho não achar nada, tenta o 2º
-        # (ad_id_map) antes de desistir, pra não deixar vendas de fora.
+        # campanha errada). 1º caminho: UTM Content = Ad Name (texto). 2º
+        # caminho: UTM Content = Ad ID (numérico), pro caso de origens de
+        # tráfego que gravam o ID em vez do nome. 3º caminho (último recurso):
+        # extrai o Ad Name do campo cru "sck bruto" (ver ad_name_from_sck_bruto)
+        # — cobre origens onde o UTM Content não bate nem com Ad Name nem com
+        # Ad ID do Meta (confirmado com UTM Source = roleta).
         meta_key = (norm(sale_camp), norm(ad))
         candidates = ad_map.get(meta_key) or ad_id_map.get(meta_key) or []
+        if not candidates and sidx["sck_bruto"] is not None:
+            sck_ad = ad_name_from_sck_bruto(cell(row, sidx["sck_bruto"]))
+            if sck_ad:
+                sck_key = (norm(sale_camp), norm(sck_ad))
+                candidates = ad_map.get(sck_key) or ad_id_map.get(sck_key) or []
         if len(candidates) == 1:
             meta_hit = candidates[0]
         elif len(candidates) > 1:
