@@ -99,9 +99,15 @@ planilha (leitura via export CSV).
   o cabeçalho é `Situacao` (não `Status`), o alias genérico de status em
   `build/build.py` foi ampliado para incluir `"situacao"` (mudança genérica, não
   específica deste cliente).
-- **Identificador do anúncio**: `UTM Content` (ex.: `BTS | VD_222`) — confirmado
-  batendo com `Ad Name` real do Meta. `UTM Term` carrega o **posicionamento**
-  (`Instagram_Stories`/`Instagram_Feed`), não o anúncio — não usar para o match.
+- **Identificador do anúncio**: `UTM Content` — na maioria das linhas vem o `Ad
+  Name` real do Meta (ex.: `BTS | VD_222`), mas em algumas origens de tráfego
+  (confirmado com `UTM Source = roleta`) vem o **Ad ID numérico** do anúncio em
+  vez do nome (ex.: `120212345678901`). O `build.py` tenta o match por `Ad
+  Name` primeiro e, se não achar, tenta por `Ad ID` (coluna `Ad ID` da aba Meta
+  Ads — 2º caminho, `ad_id_map`); quando casa pelo Ad ID, a venda herda o `Ad
+  Name` real do Meta para exibição (não mostra o ID cru nas tabelas). `UTM
+  Term` carrega o **posicionamento** (`Instagram_Stories`/`Instagram_Feed`),
+  não o anúncio — não usar para o match.
 - **Produto principal**: string única na coluna `Produto` — `MasterClass
   Best-Seller de Verdade` (`MAIN_PRODUCT_PREFIX`). Não há upsell/downsell pós-compra
   neste funil (`UPSELL_PRODUCT_PREFIX` vazio).
@@ -126,7 +132,10 @@ ConvCHK (Vendas/Checkouts) · Faturamento · ROAS (Faturamento/Gasto) · Ticket 
   diferentes; casar só pelo nome do anúncio atribuiria a venda à campanha errada. Quando
   casa, a venda herda a campanha/conjunto **reais do Meta** (fica na mesma linha do
   gasto nas tabelas). Vendas de outros funis (UTM/produto não relacionados) ficam de
-  fora. Só conta status pago.
+  fora. Só conta status pago. O match do anúncio tenta primeiro por `Ad Name` e, se
+  não achar, por `Ad ID` (ver "Identificador do anúncio" acima) — nenhuma venda deixa
+  de ser capturada só porque a origem de tráfego gravou o ID em vez do nome no
+  `UTM Content`.
 - **Desambiguação de conjunto quando o mesmo anúncio roda em mais de 1 conjunto**:
   campanha+anúncio às vezes não é suficiente — o mesmo `Ad Name` pode rodar
   simultaneamente em conjuntos diferentes na mesma campanha (ex.: teste de público
@@ -295,5 +304,10 @@ Teste local:
    Casar pela coluna errada zera as atribuições. Além disso, nomes de anúncio podem se
    repetir entre campanhas diferentes — o match precisa ser **campanha+anúncio juntos**
    (`UTM Campaign`+`UTM Content`), senão a venda pode ser atribuída à campanha errada.
+   Se o `UTM Content` bater com o `Ad ID` (numérico) em vez do `Ad Name` — acontece em
+   algumas origens de tráfego (ex.: `UTM Source = roleta` neste cliente) — o `build.py`
+   já tenta o match por `Ad ID` como 2º caminho (via a coluna `Ad ID` da aba Meta Ads,
+   `ad_id_map`) antes de desistir; confirme que a aba Meta Ads do cliente tem essa
+   coluna preenchida se vendas de uma origem específica continuarem de fora.
    Confira o valor real do `Ad Name` na API/painel do Meta e compare com as colunas
    UTM antes de mexer no alias.

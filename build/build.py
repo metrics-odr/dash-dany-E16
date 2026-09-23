@@ -255,7 +255,13 @@ def process(meta_rows, sales_rows):
          # nenhum cálculo/filtro.
          "campaign_status": ["campaign status", "status da campanha"],
          "adset_status": ["ad set status", "adset status", "status do conjunto"],
-         "ad_status": ["ad status", "status do anuncio"]},
+         "ad_status": ["ad status", "status do anuncio"],
+         # ID numérico do anúncio (estável, não muda se o nome do anúncio for
+         # editado). Algumas origens de tráfego da planilha de Compradores
+         # gravam o UTM Content como o Ad ID em vez do Ad Name (texto) — ver
+         # ad_id_map abaixo, usado como 2º caminho de match quando o match
+         # direto por nome (ad_map) não encontra nada.
+         "ad_id": ["ad id", "ad_id", "id do anuncio"]},
         # Sem fallback posicional p/ "impr": algumas planilhas não têm Impressions
         # (o build funciona sem, CPM/CTR ficam "--"); com fallback fixo, a ausência
         # da coluna faria "impr" apontar por engano p/ Link Clicks (deslocamento).
@@ -287,6 +293,14 @@ def process(meta_rows, sales_rows):
     # diferentes) — nesse caso o match fica ambíguo por campanha+anúncio sozinho;
     # ver desambiguação por UTM Medium/Term mais abaixo, na leitura da venda.
     ad_map = {}
+    # (campanha, Ad ID) normalizados -> lista de (campanha, conjunto, Ad Name).
+    # 2º caminho de match: algumas origens de tráfego da planilha de
+    # Compradores gravam o UTM Content como o ID numérico do anúncio (estável,
+    # não muda se o nome for editado) em vez do nome — o match direto por nome
+    # (ad_map) não encontra nada nesse caso, mesmo a venda sendo de um anúncio
+    # real do Meta. Guardamos o Ad Name aqui também para a venda herdar o nome
+    # de exibição correto (em vez do ID cru) quando casar por este caminho.
+    ad_id_map = {}
     # Anúncio (nome, ex. "AD07") -> 1 permalink do Instagram. "Qualquer um
     # correlato" ao anúncio serve (o mesmo criativo pode rodar em várias
     # campanhas); guardamos o primeiro link não-vazio encontrado.
@@ -299,10 +313,16 @@ def process(meta_rows, sales_rows):
         camp = cell(row, midx["campaign"]) or "(sem campanha)"
         adset = cell(row, midx["adset"]) or "(sem conjunto)"
         ad = cell(row, midx["ad"]) or "(sem anúncio)"
+        ad_id = cell(row, midx["ad_id"])
         key = (norm(camp), norm(ad))
         variants = ad_map.setdefault(key, [])
         if not any(norm(v[1]) == norm(adset) for v in variants):
-            variants.append((camp, adset))
+            variants.append((camp, adset, ad))
+        if ad_id:
+            id_key = (norm(camp), norm(ad_id))
+            id_variants = ad_id_map.setdefault(id_key, [])
+            if not any(norm(v[1]) == norm(adset) for v in id_variants):
+                id_variants.append((camp, adset, ad))
         link = cell(row, midx["link"])
         if link and ad not in ad_links:
             ad_links[ad] = link
@@ -390,10 +410,14 @@ def process(meta_rows, sales_rows):
         upsell = (not main) and is_upsell_product(prod)
         if not (main or upsell):
             continue
-        # Match com o Meta = campanha + anúncio juntos (o mesmo Ad Name se repete
-        # entre campanhas; casar só pelo anúncio atribui a venda à campanha errada).
+        # Match com o Meta = campanha + anúncio juntos (o mesmo Ad Name/Ad ID se
+        # repete entre campanhas; casar só pelo anúncio atribui a venda à
+        # campanha errada). 1º caminho: UTM Content = Ad Name (texto). Algumas
+        # origens de tráfego gravam o UTM Content como o Ad ID (numérico)
+        # em vez do nome — se o 1º caminho não achar nada, tenta o 2º
+        # (ad_id_map) antes de desistir, pra não deixar vendas de fora.
         meta_key = (norm(sale_camp), norm(ad))
-        candidates = ad_map.get(meta_key) or []
+        candidates = ad_map.get(meta_key) or ad_id_map.get(meta_key) or []
         if len(candidates) == 1:
             meta_hit = candidates[0]
         elif len(candidates) > 1:
@@ -407,7 +431,7 @@ def process(meta_rows, sales_rows):
             # um conjunto arbitrário (a campanha/anúncio continuam corretos).
             own = {norm(adset_own), norm(sale_term)}
             match = next((c for c in candidates if norm(c[1]) in own), None)
-            meta_hit = match or (candidates[0][0], "(múltiplos conjuntos)")
+            meta_hit = match or (candidates[0][0], "(múltiplos conjuntos)", candidates[0][2])
         else:
             meta_hit = None
         raw_rows.append({
@@ -428,15 +452,18 @@ def process(meta_rows, sales_rows):
     for r in raw_rows:
         if r["main"] and r["email_n"]:
             if r["meta_hit"] is not None:
-                camp, adset, is_meta = r["meta_hit"][0], r["meta_hit"][1], True
+                camp, adset, ad_nm, is_meta = r["meta_hit"][0], r["meta_hit"][1], r["meta_hit"][2], True
             else:
-                camp, adset, is_meta = r["sale_camp"], r["adset_own"], False
-            email_attr[r["email_n"]] = (camp, adset, r["ad"], is_meta)
+                camp, adset, ad_nm, is_meta = r["sale_camp"], r["adset_own"], r["ad"], False
+            email_attr[r["email_n"]] = (camp, adset, ad_nm, is_meta)
 
     sales = []
     for r in raw_rows:
         if r["meta_hit"] is not None:
-            camp, adset, ad_out, is_meta = r["meta_hit"][0], r["meta_hit"][1], r["ad"], True
+            # ad_out = Ad Name real do Meta (3º elemento de meta_hit) — não o
+            # valor cru de r["ad"], que pode ser o Ad ID quando o match veio do
+            # 2º caminho (ad_id_map) em vez do nome.
+            camp, adset, ad_out, is_meta = r["meta_hit"][0], r["meta_hit"][1], r["meta_hit"][2], True
         elif r["upsell"] and r["email_n"] in email_attr:
             camp, adset, ad_out, is_meta = email_attr[r["email_n"]]
         else:
