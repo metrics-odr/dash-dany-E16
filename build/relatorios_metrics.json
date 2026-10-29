@@ -1,9 +1,9 @@
 {
-  "gerado_em": "28/10/2026 13:18",
-  "hoje": "2026-10-28",
+  "gerado_em": "29/10/2026 13:26",
+  "hoje": "2026-10-29",
   "periodo_dados": {
     "de": "2026-09-07",
-    "ate": "2026-10-28"
+    "ate": "2026-10-29"
   },
   "metas": {
     "cac": 15.0,
@@ -12,8 +12,8 @@
   "ticket_medio_geral": 24.72,
   "periodos": {
     "hoje": {
-      "de": "2026-10-28",
-      "ate": "2026-10-28",
+      "de": "2026-10-29",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -370,8 +370,8 @@
       "piores_anuncios": []
     },
     "ontem": {
-      "de": "2026-10-27",
-      "ate": "2026-10-27",
+      "de": "2026-10-28",
+      "ate": "2026-10-28",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -728,8 +728,8 @@
       "piores_anuncios": []
     },
     "3d": {
-      "de": "2026-10-26",
-      "ate": "2026-10-28",
+      "de": "2026-10-27",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -1086,8 +1086,8 @@
       "piores_anuncios": []
     },
     "7d": {
-      "de": "2026-10-22",
-      "ate": "2026-10-28",
+      "de": "2026-10-23",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -1444,8 +1444,8 @@
       "piores_anuncios": []
     },
     "14d": {
-      "de": "2026-10-15",
-      "ate": "2026-10-28",
+      "de": "2026-10-16",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -1802,14 +1802,14 @@
       "piores_anuncios": []
     },
     "30d": {
-      "de": "2026-09-29",
-      "ate": "2026-10-28",
+      "de": "2026-09-30",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
         "cliques": 0.0,
         "pv": 0.0,
-        "ck": 25.0,
+        "ck": 17.0,
         "vendas": 0,
         "fat": 0.0,
         "cpm": null,
@@ -1830,7 +1830,7 @@
         "impr": 0.0,
         "cliques": 0.0,
         "pv": 0.0,
-        "ck": 25.0,
+        "ck": 17.0,
         "vendas": 0,
         "fat": 0.0,
         "cpm": null,
@@ -1853,7 +1853,7 @@
           "impr": 0.0,
           "cliques": 0.0,
           "pv": 0.0,
-          "ck": 14.0,
+          "ck": 10.0,
           "vendas": 0,
           "fat": 0.0,
           "cpm": null,
@@ -2007,7 +2007,7 @@
           "impr": 0.0,
           "cliques": 0.0,
           "pv": 0.0,
-          "ck": 2.0,
+          "ck": 0.0,
           "vendas": 0,
           "fat": 0.0,
           "cpm": null,
@@ -2015,9 +2015,9 @@
           "cpc": null,
           "cpv": null,
           "cr": null,
-          "cpic": 0.0,
+          "cpic": null,
           "vischk": null,
-          "convchk": 0.0,
+          "convchk": null,
           "convlp": null,
           "cac": null,
           "roas": null,
@@ -2117,7 +2117,7 @@
           "impr": 0.0,
           "cliques": 0.0,
           "pv": 0.0,
-          "ck": 3.0,
+          "ck": 1.0,
           "vendas": 0,
           "fat": 0.0,
           "cpm": null,
@@ -2161,7 +2161,7 @@
     },
     "mes": {
       "de": "2026-10-01",
-      "ate": "2026-10-28",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -2921,10 +2921,10 @@
       ],
       "piores_anuncios": [
         {
-          "nome": "BTS | IMG_08",
-          "campanha": "26-E16 | BTS | E4-VEN | P1-QUENTE | VND | CBO | 2026-09-21 | Remarketing | Ultimos Dias",
-          "conjunto": "AUTO | ALL | 35 a 65 | BR | Visitou LP ou Roleta 30D",
-          "gasto": 37.15,
+          "nome": "BTS | VD_234",
+          "campanha": "26-E16 | BTS | TESTE | P2-FRIO | VND | ABO | 2026-09-11 | Teste Publicos",
+          "conjunto": "AUTO | ADV OFF | TopAds",
+          "gasto": 6.89,
           "vendas": 0,
           "cac": null,
           "roas": 0.0
@@ -2957,10 +2957,10 @@
           "roas": 0.0
         },
         {
-          "nome": "BTS | VD_238",
+          "nome": "BTS | VD_234",
           "campanha": "26-E16 | BTS | TESTE | P2-FRIO | VND | ABO | 2026-09-11 | Teste Publicos",
-          "conjunto": "AUTO | ADV ON | TopAds",
-          "gasto": 74.5,
+          "conjunto": "AUTO | Interesses | LaL 1% Masterclass",
+          "gasto": 4.17,
           "vendas": 0,
           "cac": null,
           "roas": 0.0
@@ -2969,7 +2969,7 @@
     },
     "todo": {
       "de": "2026-09-07",
-      "ate": "2026-10-28",
+      "ate": "2026-10-29",
       "total": {
         "gasto": 49058.03,
         "impr": 488323.0,
