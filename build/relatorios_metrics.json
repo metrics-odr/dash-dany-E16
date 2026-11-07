@@ -1,9 +1,9 @@
 {
-  "gerado_em": "06/11/2026 13:57",
-  "hoje": "2026-11-06",
+  "gerado_em": "07/11/2026 12:56",
+  "hoje": "2026-11-07",
   "periodo_dados": {
     "de": "2026-09-07",
-    "ate": "2026-11-06"
+    "ate": "2026-11-07"
   },
   "metas": {
     "cac": 15.0,
@@ -12,8 +12,8 @@
   "ticket_medio_geral": 24.72,
   "periodos": {
     "hoje": {
-      "de": "2026-11-06",
-      "ate": "2026-11-06",
+      "de": "2026-11-07",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -370,8 +370,8 @@
       "piores_anuncios": []
     },
     "ontem": {
-      "de": "2026-11-05",
-      "ate": "2026-11-05",
+      "de": "2026-11-06",
+      "ate": "2026-11-06",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -728,8 +728,8 @@
       "piores_anuncios": []
     },
     "3d": {
-      "de": "2026-11-04",
-      "ate": "2026-11-06",
+      "de": "2026-11-05",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -1086,8 +1086,8 @@
       "piores_anuncios": []
     },
     "7d": {
-      "de": "2026-10-31",
-      "ate": "2026-11-06",
+      "de": "2026-11-01",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -1444,8 +1444,8 @@
       "piores_anuncios": []
     },
     "14d": {
-      "de": "2026-10-24",
-      "ate": "2026-11-06",
+      "de": "2026-10-25",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -1802,8 +1802,8 @@
       "piores_anuncios": []
     },
     "30d": {
-      "de": "2026-10-08",
-      "ate": "2026-11-06",
+      "de": "2026-10-09",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -2161,7 +2161,7 @@
     },
     "mes": {
       "de": "2026-11-01",
-      "ate": "2026-11-06",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 0.0,
         "impr": 0.0,
@@ -2652,28 +2652,6 @@
           "ticket": null
         },
         {
-          "nome": "26-E16 | BTS | E4-VEN | P2-FRIO | VND | CBO | 2026-09-09 | Validados 02",
-          "gasto": 0.0,
-          "impr": 0.0,
-          "cliques": 0.0,
-          "pv": 0.0,
-          "ck": 0.0,
-          "vendas": 0,
-          "fat": 0.0,
-          "cpm": null,
-          "ctr": null,
-          "cpc": null,
-          "cpv": null,
-          "cr": null,
-          "cpic": null,
-          "vischk": null,
-          "convchk": null,
-          "convlp": null,
-          "cac": null,
-          "roas": null,
-          "ticket": null
-        },
-        {
           "nome": "26-E16 | BTS | TESTE | P2-FRIO | VND | ABO | 2026-09-09 | Teste 03",
           "gasto": 0.0,
           "impr": 0.0,
@@ -2697,6 +2675,28 @@
         },
         {
           "nome": "26-E16 | BTS | TESTE | P2-FRIO | VND | ABO | 2026-09-09 | Teste 01",
+          "gasto": 0.0,
+          "impr": 0.0,
+          "cliques": 0.0,
+          "pv": 0.0,
+          "ck": 0.0,
+          "vendas": 0,
+          "fat": 0.0,
+          "cpm": null,
+          "ctr": null,
+          "cpc": null,
+          "cpv": null,
+          "cr": null,
+          "cpic": null,
+          "vischk": null,
+          "convchk": null,
+          "convlp": null,
+          "cac": null,
+          "roas": null,
+          "ticket": null
+        },
+        {
+          "nome": "26-E16 | BTS | E4-VEN | P2-FRIO | VND | CBO | 2026-09-09 | Validados 02",
           "gasto": 0.0,
           "impr": 0.0,
           "cliques": 0.0,
@@ -2877,7 +2877,7 @@
     },
     "todo": {
       "de": "2026-09-07",
-      "ate": "2026-11-06",
+      "ate": "2026-11-07",
       "total": {
         "gasto": 49058.03,
         "impr": 488323.0,
